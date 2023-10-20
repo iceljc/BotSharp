@@ -1,8 +1,9 @@
 using BotSharp.Plugin.MongoStorage.Collections;
+using EntityFrameworkCore.BootKit;
 
 namespace BotSharp.Plugin.MongoStorage;
 
-public class MongoDbContext
+public class MongoDbContext : Database
 {
     private readonly MongoClient _mongoClient;
     private readonly string _mongoDbDatabaseName;

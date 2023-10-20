@@ -1,6 +1,6 @@
 using BotSharp.Plugin.MongoStorage.Repository;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using EntityFrameworkCore.BootKit;
+using System.Data.Common;
 
 namespace BotSharp.Plugin.MongoStorage;
 
@@ -27,5 +27,18 @@ public class MongoStoragePlugin : IBotSharpPlugin
 
             services.AddScoped<IBotSharpRepository, MongoRepository>();
         }
+    }
+
+    private MongoDbContext BuildMongoDbContext(BotSharpDatabaseSettings settings, IServiceProvider serviceProvider)
+    {
+        var dc = new MongoDbContext(settings);
+        dc.BindDbContext<IMongoCollection, DbContext4MongoDb>(new DatabaseBind
+        {
+            ServiceProvider = serviceProvider,
+            MasterConnection = new MongoDbConnection(settings.BotSharpMongoDb),
+            SlaveConnections = new List<DbConnection>(),
+            IsRelational = false
+        });
+        return dc;
     }
 }
