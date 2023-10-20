@@ -1,6 +1,7 @@
 using BotSharp.Plugin.MongoStorage.Repository;
 using EntityFrameworkCore.BootKit;
 using System.Data.Common;
+using System.Reflection;
 
 namespace BotSharp.Plugin.MongoStorage;
 
@@ -22,7 +23,7 @@ public class MongoStoragePlugin : IBotSharpPlugin
             services.AddScoped((IServiceProvider x) =>
             {
                 var dbSettings = x.GetRequiredService<BotSharpDatabaseSettings>();
-                return new MongoDbContext(dbSettings);
+                return BuildMongoDbContext(dbSettings, x);
             });
 
             services.AddScoped<IBotSharpRepository, MongoRepository>();
@@ -31,7 +32,10 @@ public class MongoStoragePlugin : IBotSharpPlugin
 
     private MongoDbContext BuildMongoDbContext(BotSharpDatabaseSettings settings, IServiceProvider serviceProvider)
     {
-        var dc = new MongoDbContext(settings);
+        var dc = new MongoDbContext(settings.TablePrefix);
+        var curAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+        AppDomain.CurrentDomain.SetData("Assemblies", new string[] { curAssemblyName });
+
         dc.BindDbContext<IMongoCollection, DbContext4MongoDb>(new DatabaseBind
         {
             ServiceProvider = serviceProvider,
