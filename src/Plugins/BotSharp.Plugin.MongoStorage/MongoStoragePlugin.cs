@@ -33,7 +33,7 @@ public class MongoStoragePlugin : IBotSharpPlugin
     private MongoDbContext BuildMongoDbContext(BotSharpDatabaseSettings settings, IServiceProvider serviceProvider)
     {
         var dc = new MongoDbContext(settings.TablePrefix);
-        var curAssemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+        var curAssemblyName = typeof(MongoStoragePlugin).Assembly.GetName().Name;
         AppDomain.CurrentDomain.SetData("Assemblies", new string[] { curAssemblyName });
 
         dc.BindDbContext<IMongoCollection, DbContext4MongoDb>(new DatabaseBind
