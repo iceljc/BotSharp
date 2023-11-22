@@ -37,13 +37,28 @@ public class ProviderHelper
             var role = line.Substring(0, line.IndexOf(' ') - 1).Trim();
             var content = line.Substring(line.IndexOf(' ') + 1).Trim();
 
+            var message = new RoleDialogModel(role, content);
+
             // comments
             if (role == "##")
             {
                 continue;
             }
 
-            samples.Add(new RoleDialogModel(role, content));
+            if (role == "function")
+            {
+                var elements = content.Split("|");
+                var functionName = elements[0];
+                var functionArgs = elements[1];
+                var text = elements[2];
+                message = new RoleDialogModel(role, text)
+                {
+                    FunctionName = functionName,
+                    FunctionArgs = functionArgs
+                };
+            }
+
+            samples.Add(message);
         }
 
         return samples;

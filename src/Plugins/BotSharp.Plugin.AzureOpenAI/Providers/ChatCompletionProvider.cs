@@ -212,7 +212,17 @@ public class ChatCompletionProvider : IChatCompletion
         var samples = ProviderHelper.GetChatSamples(agent.Samples);
         foreach (var message in samples)
         {
-            chatCompletionsOptions.Messages.Add(new ChatMessage(message.Role, message.Content));
+            var chat = new ChatMessage(message.Role, message.Content);
+            if (message.Role == ChatRole.Assistant)
+            {
+                chat = new ChatMessage(message.Role, message.Content)
+                {
+                    Name = message.FunctionName,
+                    FunctionCall = new FunctionCall(message.FunctionName, message.FunctionArgs)
+                };
+            }
+
+            chatCompletionsOptions.Messages.Add(chat);
         }
 
         foreach (var function in agent.Functions)
