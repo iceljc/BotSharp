@@ -4,6 +4,7 @@ using System;
 using BotSharp.Plugin.AzureOpenAI.Settings;
 using BotSharp.Abstraction.Conversations.Models;
 using System.Collections.Generic;
+using BotSharp.Abstraction.Agents.Enums;
 
 namespace BotSharp.Plugin.AzureOpenAI.Providers;
 
@@ -45,17 +46,19 @@ public class ProviderHelper
                 continue;
             }
 
-            if (role == "function")
+            if (role == AgentRole.Assistant)
             {
                 var elements = content.Split("|");
-                var functionName = elements[0];
-                var functionArgs = elements[1];
-                var text = elements[2];
-                message = new RoleDialogModel(role, text)
+                var text = elements[0];
+                message = new RoleDialogModel(role, text);
+
+                if (elements.Length > 1)
                 {
-                    FunctionName = functionName,
-                    FunctionArgs = functionArgs
-                };
+                    var functionName = elements[1];
+                    var functionArgs = elements[2];
+                    message.FunctionName = functionName;
+                    message.FunctionArgs = functionArgs;
+                }
             }
 
             samples.Add(message);

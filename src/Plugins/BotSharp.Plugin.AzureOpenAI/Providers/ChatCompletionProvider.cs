@@ -215,11 +215,15 @@ public class ChatCompletionProvider : IChatCompletion
             var chat = new ChatMessage(message.Role, message.Content);
             if (message.Role == ChatRole.Assistant)
             {
-                chat = new ChatMessage(message.Role, message.Content)
+                if (!string.IsNullOrEmpty(message.FunctionName))
                 {
-                    Name = message.FunctionName,
-                    FunctionCall = new FunctionCall(message.FunctionName, message.FunctionArgs)
-                };
+                    chat.Name = message.FunctionName;
+
+                    if (!string.IsNullOrEmpty(message.FunctionArgs))
+                    {
+                        chat.FunctionCall = new FunctionCall(message.FunctionName, message.FunctionArgs);
+                    }
+                }
             }
 
             chatCompletionsOptions.Messages.Add(chat);
