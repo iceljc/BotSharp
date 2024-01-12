@@ -21,7 +21,7 @@ public partial class ConversationService
         Agent agent = await agentService.LoadAgent(agentId);
 
         var content = $"Received [{agent.Name}] {message.Role}: {message.Content}";
-#if DEBUG
+#if !DEBUG
         Console.WriteLine(content, Color.GreenYellow);
 #else
         _logger.LogInformation(content);
