@@ -15,6 +15,7 @@ public partial class ConversationService
         Func<RoleDialogModel, Task> onFunctionExecuting,
         Func<RoleDialogModel, Task> onFunctionExecuted)
     {
+        _logger.LogDebug("Conversation begins...");
         var conversation = await GetConversationRecord(agentId);
 
         var agentService = _services.GetRequiredService<IAgentService>();

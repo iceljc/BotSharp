@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Serilog.Events;
 
 namespace BotSharp.Plugin.ChatHub;
 
 [Authorize]
-public class SignalRHub : Hub
+public class SignalRHub : Hub<ISignalRHub>
 {
     private readonly IServiceProvider _services;
     private readonly ILogger _logger;
