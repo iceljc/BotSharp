@@ -1,3 +1,5 @@
+using BotSharp.Abstraction.Browsing;
+using BotSharp.Abstraction.Browsing.Models;
 using BotSharp.Abstraction.Google.Models;
 using BotSharp.Abstraction.Google.Settings;
 using BotSharp.Abstraction.Options;
@@ -78,5 +80,37 @@ public class GoogleController : ControllerBase
         }
 
         return result;
+    }
+
+    [HttpPost("/web/test")]
+    public async Task WebDriverTest()
+    {
+        var web = _services.GetRequiredService<IWebBrowser>();
+        var id = Guid.NewGuid().ToString();
+        var messageInfo = new MessageInfo()
+        {
+            ConversationId = id
+        };
+        var location = new ElementLocatingArgs()
+        {
+            AttributeName = "class",
+            AttributeValue = "result_link",
+            Index = 0
+        };
+        
+        var res = await web.LaunchBrowser(id, "https://www.wikihow.com/wikiHowTo?search=how+to+fix+toilet+clog");
+        var locateResult = await web.LocateElement(messageInfo, location);
+        location = new ElementLocatingArgs()
+        {
+            AttributeName = "href"
+        };
+        var link = await web.GetAttributeValue(messageInfo, location, locateResult);
+        location = new ElementLocatingArgs()
+        {
+            Selector = ".result_link .result .result_data .result_title",
+            Index = 0
+        };
+        locateResult = await web.LocateElement(messageInfo, location);
+        return;
     }
 }

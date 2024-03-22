@@ -94,7 +94,7 @@ public class RoutingContext : IRoutingContext
     /// </summary>
     public void Pop(string? reason = null)
     {
-        if (_stack.Count == 0)
+        if (_stack.Count <= 1)
         {
             return;
         }
