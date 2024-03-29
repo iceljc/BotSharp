@@ -15,4 +15,23 @@ public partial class PlaywrightWebDriver
 
         return value ?? string.Empty;
     }
+
+    public async Task<string> GetStyleAttributeValue(MessageInfo message, ElementLocatingArgs location, BrowserActionResult result)
+    {
+        var page = _instance.GetPage(message.ConversationId);
+        ILocator locator = page.Locator(result.Selector);
+        var value = string.Empty;
+
+        //if (!string.IsNullOrEmpty(location?.AttributeName))
+        //{
+            
+        //}
+
+        var temp = await locator.EvaluateAsync(@"(element) => {
+                const style = window.getComputedStyle(element);
+                return style.getPropertyValue('background-image');
+            }", locator);
+
+        return value ?? string.Empty;
+    }
 }

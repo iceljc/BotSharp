@@ -99,18 +99,39 @@ public class GoogleController : ControllerBase
         };
         
         var res = await web.LaunchBrowser(id, "https://www.wikihow.com/wikiHowTo?search=how+to+fix+toilet+clog");
+
+        // Locate link
         var locateResult = await web.LocateElement(messageInfo, location);
         location = new ElementLocatingArgs()
         {
             AttributeName = "href"
         };
         var link = await web.GetAttributeValue(messageInfo, location, locateResult);
+
+        // Locate thumbnail
+        location = new ElementLocatingArgs()
+        {
+            Selector = ".result_link .result .result_thumb",
+            Index = 0
+        };
+        locateResult = await web.LocateElement(messageInfo, location);
+
+        location = new ElementLocatingArgs()
+        {
+            AttributeName = "style",
+            Index = 0
+        };
+        var style = await web.GetAttributeValue(messageInfo, location, locateResult);
+
+        // Locate title
         location = new ElementLocatingArgs()
         {
             Selector = ".result_link .result .result_data .result_title",
             Index = 0
         };
         locateResult = await web.LocateElement(messageInfo, location);
+
+        await web.CloseBrowser(id);
         return;
     }
 }
