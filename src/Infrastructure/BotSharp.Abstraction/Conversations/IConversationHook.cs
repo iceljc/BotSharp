@@ -43,7 +43,7 @@ public interface IConversationHook
     Task OnDialogRecordLoaded(RoleDialogModel dialog);
 
     Task OnStateLoaded(ConversationState state);
-    Task OnStateChanged(string name, string preValue, string currentValue);
+    Task OnStateChanged(StateChangeModel stateChange);
 
     Task OnMessageReceived(RoleDialogModel message);
     Task OnPostbackMessageReceived(RoleDialogModel message, PostbackMessageModel replyMsg);
@@ -93,4 +93,11 @@ public interface IConversationHook
     /// <param name="messageId"></param>
     /// <returns></returns>
     Task OnMessageDeleted(string conversationId, string messageId);
+
+    /// <summary>
+    /// Brakpoint updated
+    /// </summary>
+    /// <param name="conversationId"></param>
+    /// <returns></returns>
+    Task OnBreakpointUpdated(string conversationId, bool resetStates);
 }

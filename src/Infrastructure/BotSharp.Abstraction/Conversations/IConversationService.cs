@@ -8,7 +8,7 @@ public interface IConversationService
     IConversationStateService States { get; }
     string ConversationId { get; }
     Task<Conversation> NewConversation(Conversation conversation);
-    void SetConversationId(string conversationId, List<string> states);
+    void SetConversationId(string conversationId, List<MessageState> states);
     Task<Conversation> GetConversation(string id);
     Task<PagedItems<Conversation>> GetConversations(ConversationFilter filter);
     Task<Conversation> UpdateConversationTitle(string id, string title);
@@ -35,6 +35,13 @@ public interface IConversationService
         Func<RoleDialogModel, Task> onFunctionExecuting,
         Func<RoleDialogModel, Task> onFunctionExecuted);
 
-    List<RoleDialogModel> GetDialogHistory(int lastCount = 50);
+    List<RoleDialogModel> GetDialogHistory(int lastCount = 50, bool fromBreakpoint = true);
     Task CleanHistory(string agentId);
+
+    /// <summary>
+    /// Use this feature when you want to hide some context from LLM.
+    /// </summary>
+    /// <param name="resetStates">Whether to reset all states</param>
+    /// <returns></returns>
+    Task UpdateBreakpoint(bool resetStates = false);
 }

@@ -27,12 +27,14 @@ public partial class ConversationService
 #endif
 
         message.CurrentAgentId = agent.Id;
+        message.CreatedAt = DateTime.UtcNow;
         if (string.IsNullOrEmpty(message.SenderId))
         {
             message.SenderId = _user.Id;
         }
 
-        _storage.Append(_conversationId, message);
+        var conv = _services.GetRequiredService<IConversationService>();
+        var dialogs = conv.GetDialogHistory();
 
         var statistics = _services.GetRequiredService<ITokenStatistics>();
         var hooks = _services.GetServices<IConversationHook>().ToList();
@@ -51,7 +53,7 @@ public partial class ConversationService
             hook.SetAgent(agent)
                 .SetConversation(conversation);
 
-            if (replyMessage == null)
+            if (replyMessage == null || string.IsNullOrEmpty(replyMessage.FunctionName))
             {
                 await hook.OnMessageReceived(message);
             }
@@ -69,13 +71,19 @@ public partial class ConversationService
             }
         }
 
+        // Persist to storage
+        _storage.Append(_conversationId, message);
+
+        // Add to thread
+        dialogs.Add(RoleDialogModel.From(message));
+
         if (!stopCompletion)
         {
             // Routing with reasoning
             var settings = _services.GetRequiredService<RoutingSettings>();
 
             response = agent.Type == AgentType.Routing ?
-                await routing.InstructLoop(message) :
+                await routing.InstructLoop(message, dialogs) :
                 await routing.InstructDirect(agent, message);
 
             routing.ResetRecursiveCounter();

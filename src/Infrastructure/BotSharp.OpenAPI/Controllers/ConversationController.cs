@@ -1,3 +1,4 @@
+using BotSharp.Abstraction.Routing;
 using BotSharp.Abstraction.Users.Models;
 
 namespace BotSharp.OpenAPI.Controllers;
@@ -65,8 +66,8 @@ public class ConversationController : ControllerBase
     public async Task<IEnumerable<ChatResponseModel>> GetDialogs([FromRoute] string conversationId)
     {
         var conv = _services.GetRequiredService<IConversationService>();
-        conv.SetConversationId(conversationId, new List<string>());
-        var history = conv.GetDialogHistory();
+        conv.SetConversationId(conversationId, new List<MessageState>());
+        var history = conv.GetDialogHistory(fromBreakpoint: false);
 
         var userService = _services.GetRequiredService<IUserService>();
         var agentService = _services.GetRequiredService<IAgentService>();
@@ -161,6 +162,9 @@ public class ConversationController : ControllerBase
         }
 
         var inputMsg = new RoleDialogModel(AgentRole.User, input.Text);
+        var routing = _services.GetRequiredService<IRoutingService>();
+        routing.Context.SetMessageId(conversationId, inputMsg.MessageId);
+
         conv.SetConversationId(conversationId, input.States);
         conv.States.SetState("channel", input.Channel)
                    .SetState("provider", input.Provider)

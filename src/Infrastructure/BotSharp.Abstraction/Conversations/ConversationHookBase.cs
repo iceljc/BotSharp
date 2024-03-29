@@ -29,7 +29,7 @@ public abstract class ConversationHookBase : IConversationHook
     public virtual Task OnStateLoaded(ConversationState state)
         => Task.CompletedTask;
 
-    public virtual Task OnStateChanged(string name, string preValue, string currentValue)
+    public virtual Task OnStateChanged(StateChangeModel stateChange)
         => Task.CompletedTask;
 
     public virtual Task OnDialogRecordLoaded(RoleDialogModel dialog)
@@ -72,5 +72,8 @@ public abstract class ConversationHookBase : IConversationHook
         => Task.CompletedTask;
 
     public virtual Task OnMessageDeleted(string conversationId, string messageId)
+        => Task.CompletedTask;
+
+    public virtual Task OnBreakpointUpdated(string conversationId, bool resetStates)
         => Task.CompletedTask;
 }

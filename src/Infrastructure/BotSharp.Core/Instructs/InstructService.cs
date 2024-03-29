@@ -68,6 +68,7 @@ public partial class InstructService : IInstructService
 
         var completer = CompletionProvider.GetCompletion(_services,
             agentConfig: agent.LlmConfig);
+
         var response = new InstructResult
         {
             MessageId = message.MessageId
@@ -79,6 +80,12 @@ public partial class InstructService : IInstructService
         }
         else if (completer is IChatCompletion chatCompleter)
         {
+            if (instruction == "#TEMPLATE#")
+            {
+                instruction = prompt;
+                prompt = message.Content;
+            }
+
             var result = await chatCompleter.GetChatCompletions(new Agent
             {
                 Id = agentId,

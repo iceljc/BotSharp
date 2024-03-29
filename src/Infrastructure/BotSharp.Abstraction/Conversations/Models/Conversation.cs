@@ -24,6 +24,8 @@ public class Conversation
 
     public string Channel { get; set; } = ConversationChannel.OpenAPI;
 
+    public int DialogCount { get; set; }
+
     public DateTime UpdatedTime { get; set; } = DateTime.UtcNow;
     public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
 }
@@ -44,6 +46,11 @@ public class DialogElement
         MetaData = meta;
         Content = content;
         RichContent = richContent;
+    }
+
+    public override string ToString()
+    {
+        return $"{MetaData.Role}: {Content} [{MetaData.CreateTime}]";
     }
 }
 
