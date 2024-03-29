@@ -121,7 +121,12 @@ public class GoogleController : ControllerBase
             AttributeName = "style",
             Index = 0
         };
-        var style = await web.GetAttributeValue(messageInfo, location, locateResult);
+        var styleValue = await web.GetAttributeValue(messageInfo, location, locateResult);
+        var styles = styleValue?.Split(";", StringSplitOptions.RemoveEmptyEntries)?.ToList() ?? new List<string>();
+        var bgImage = styles.FirstOrDefault(x => x.StartsWith("background-image", StringComparison.OrdinalIgnoreCase));
+        var start = bgImage.IndexOf("(");
+        var end = bgImage.IndexOf(")");
+        var thumbnail = bgImage.Substring(start + 1, end - start - 1);
 
         // Locate title
         location = new ElementLocatingArgs()

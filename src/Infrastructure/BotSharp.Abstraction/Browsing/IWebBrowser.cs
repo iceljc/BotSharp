@@ -25,5 +25,4 @@ public interface IWebBrowser
     Task CloseBrowser(string conversationId);
     Task<BrowserActionResult> SendHttpRequest(BrowserActionParams actionParams);
     Task<string> GetAttributeValue(MessageInfo message, ElementLocatingArgs location, BrowserActionResult result);
-    Task<string> GetStyleAttributeValue(MessageInfo message, ElementLocatingArgs location, BrowserActionResult result);
 }
