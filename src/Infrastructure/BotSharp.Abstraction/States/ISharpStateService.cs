@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace BotSharp.Abstraction.States;
 
-public interface IBotSharpState
+public interface ISharpStateService
 {
 
     string GetSessionId();

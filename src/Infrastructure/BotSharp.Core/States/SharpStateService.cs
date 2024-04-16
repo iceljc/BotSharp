@@ -1,15 +1,15 @@
 namespace BotSharp.Core.States;
 
-public class BotSharpState : IBotSharpState, IDisposable
+public class SharpStateService : ISharpStateService, IDisposable
 {
     private readonly IServiceProvider _services;
     private readonly IBotSharpRepository _db;
-    private readonly ILogger<BotSharpState> _logger;
+    private readonly ILogger<SharpStateService> _logger;
     private string _sessionId;
 
-    public BotSharpState(IServiceProvider services,
+    public SharpStateService(IServiceProvider services,
         IBotSharpRepository db,
-        ILogger<BotSharpState> logger)
+        ILogger<SharpStateService> logger)
     {
         _services = services;
         _db = db;
