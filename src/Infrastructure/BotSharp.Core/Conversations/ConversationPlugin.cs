@@ -31,6 +31,7 @@ public class ConversationPlugin : IBotSharpPlugin
             return settingService.Bind<ConversationSetting>("Conversation");
         });
 
+        services.AddScoped<IBotSharpState, BotSharpState>();
         services.AddScoped<IConversationStorage, ConversationStorage>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IConversationStateService, ConversationStateService>();
