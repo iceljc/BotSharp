@@ -32,31 +32,31 @@ public class Agent
     /// Channel instructions
     /// </summary>
     [JsonIgnore]
-    public List<ChannelInstruction> ChannelInstructions { get; set; } = new();
+    public List<ChannelInstruction> ChannelInstructions { get; set; } = [];
 
     /// <summary>
     /// Templates
     /// </summary>
     [JsonIgnore]
-    public List<AgentTemplate> Templates { get; set; } = new();
+    public List<AgentTemplate> Templates { get; set; } = [];
 
     /// <summary>
     /// Agent tasks
     /// </summary>
     [JsonIgnore]
-    public List<AgentTask> Tasks { get; set; } = new();
+    public List<AgentTask> Tasks { get; set; } = [];
 
     /// <summary>
     /// Samples
     /// </summary>
     [JsonIgnore]
-    public List<string> Samples { get; set; } = new();
+    public List<string> Samples { get; set; } = [];
 
     /// <summary>
     /// Functions
     /// </summary>
     [JsonIgnore]
-    public List<FunctionDef> Functions { get; set; } = new();
+    public List<FunctionDef> Functions { get; set; } = [];
 
     /// <summary>
     /// Responses
@@ -87,12 +87,12 @@ public class Agent
     /// <summary>
     /// Profile by channel
     /// </summary>
-    public List<string> Profiles { get; set; } = new();
+    public List<string> Profiles { get; set; } = [];
 
     /// <summary>
     /// Agent labels
     /// </summary>
-    public List<string> Labels { get; set; } = new();
+    public List<string> Labels { get; set; } = [];
 
     /// <summary>
     /// Merge utilities from entry agent
@@ -102,12 +102,12 @@ public class Agent
     /// <summary>
     /// Agent utilities
     /// </summary>
-    public List<AgentUtility> Utilities { get; set; } = new();
+    public List<AgentUtility> Utilities { get; set; } = [];
 
     /// <summary>
     /// Agent rules
     /// </summary>
-    public List<AgentRule> Rules { get; set; } = new();
+    public List<AgentRule> Rules { get; set; } = [];
 
     /// <summary>
     /// Agent knowledge bases
@@ -125,19 +125,26 @@ public class Agent
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? MaxMessageCount { get; set; }
 
-    public List<RoutingRule> RoutingRules { get; set; } = new();
+    public List<RoutingRule> RoutingRules { get; set; } = [];
 
     /// <summary>
     /// For rendering deferral
     /// </summary>
     [JsonIgnore]
-    public Dictionary<string, object> TemplateDict { get; set; } = new();
+    public Dictionary<string, object> TemplateDict { get; set; } = [];
 
     [JsonIgnore]
     public List<FunctionDef> SecondaryFunctions { get; set; } = [];
 
     [JsonIgnore]
     public List<string> SecondaryInstructions { get; set; } = [];
+
+    [JsonIgnore]
+    public string? StandbyInstruction { get; set; }
+
+    [JsonIgnore]
+    public string? SwitchInstruction { get; set; }
+
 
     public override string ToString()
         => $"{Name} {Id}";

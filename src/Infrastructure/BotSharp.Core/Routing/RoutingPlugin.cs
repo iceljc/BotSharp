@@ -22,6 +22,7 @@ public class RoutingPlugin : IBotSharpPlugin
     public void RegisterDI(IServiceCollection services, IConfiguration config)
     {
         services.AddScoped<IRoutingContext, RoutingContext>();
+        services.AddScoped<ISwitchContext, SwitchContext>();
 
         // Register router
         services.AddScoped(provider =>
@@ -35,7 +36,6 @@ public class RoutingPlugin : IBotSharpPlugin
 
         services.AddScoped<IRoutingReasoner, NaiveReasoner>();
         services.AddScoped<IRoutingReasoner, HFReasoner>();
-        
         services.AddScoped<IRoutingReasoner, OneStepForwardReasoner>();
 
         services.AddScoped<IAgentUtilityHook, RoutingUtilityHook>();

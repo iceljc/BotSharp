@@ -16,23 +16,29 @@ public partial class RoutingService
             return false;
         }
 
-        var provider = agent.LlmConfig.Provider;
-        var model = agent.LlmConfig.Model;
-
-        if (provider == null || model == null)
-        {
-            var agentSettings = _services.GetRequiredService<AgentSettings>();
-            provider = agentSettings.LlmConfig.Provider;
-            model = agentSettings.LlmConfig.Model;
-        }
-
-        var chatCompletion = CompletionProvider.GetChatCompletion(_services, 
-            provider: provider,
-            model: model);
-
         var message = dialogs.Last();
-        var response = await chatCompletion.GetChatCompletions(agent, dialogs);
+        var response = RoleDialogModel.From(message);
+        var switchCtx = _services.GetRequiredService<ISwitchContext>();
+        await switchCtx.SwitchAsync(agent, dialogs, async () =>
+        {
+            var provider = agent.LlmConfig.Provider;
+            var model = agent.LlmConfig.Model;
 
+            if (provider == null || model == null)
+            {
+                var agentSettings = _services.GetRequiredService<AgentSettings>();
+                provider = agentSettings.LlmConfig.Provider;
+                model = agentSettings.LlmConfig.Model;
+            }
+
+            var chatCompletion = CompletionProvider.GetChatCompletion(_services,
+                provider: provider,
+                model: model);
+
+            response = await chatCompletion.GetChatCompletions(agent, dialogs);
+        });
+
+        
         if (response.Role == AgentRole.Function)
         {
             message = RoleDialogModel.From(message, role: AgentRole.Function);
