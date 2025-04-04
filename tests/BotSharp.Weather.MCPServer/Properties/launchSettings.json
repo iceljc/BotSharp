@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "BotSharp.Weather.MCPServer": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:12344;http://localhost:12345"
+    }
+  }
+}

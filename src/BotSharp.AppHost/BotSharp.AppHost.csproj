@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\tests\BotSharp.PizzaBot.MCPServer\BotSharp.PizzaBot.MCPServer.csproj" />
+    <ProjectReference Include="..\..\tests\BotSharp.Weather.MCPServer\BotSharp.Weather.MCPServer.csproj" />
     <ProjectReference Include="..\BotSharp.ServiceDefaults\BotSharp.ServiceDefaults.csproj" />
     <ProjectReference Include="..\WebStarter\WebStarter.csproj" />
   </ItemGroup>
