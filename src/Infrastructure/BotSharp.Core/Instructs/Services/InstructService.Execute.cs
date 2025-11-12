@@ -49,110 +49,107 @@ public partial class InstructService
 
         // Run code template
         var codeResponse = await RunCode(agent, message, templateName, codeOptions);
-        if (codeResponse != null)
-        {
-            return codeResponse;
-        }
+        return codeResponse;
 
 
-        // Before completion hooks
-        var hooks = _services.GetHooks<IInstructHook>(agentId);
-        foreach (var hook in hooks)
-        {
-            await hook.BeforeCompletion(agent, message);
+        //// Before completion hooks
+        //var hooks = _services.GetHooks<IInstructHook>(agentId);
+        //foreach (var hook in hooks)
+        //{
+        //    await hook.BeforeCompletion(agent, message);
 
-            // Interrupted by hook
-            if (message.StopCompletion)
-            {
-                return new InstructResult
-                {
-                    MessageId = message.MessageId,
-                    Text = message.Content
-                };
-            }
-        }
+        //    // Interrupted by hook
+        //    if (message.StopCompletion)
+        //    {
+        //        return new InstructResult
+        //        {
+        //            MessageId = message.MessageId,
+        //            Text = message.Content
+        //        };
+        //    }
+        //}
 
 
-        var provider = string.Empty;
-        var model = string.Empty;
-        var result = string.Empty;
+        //var provider = string.Empty;
+        //var model = string.Empty;
+        //var result = string.Empty;
 
-        // Render prompt
-        var prompt = string.IsNullOrEmpty(templateName) ?
-            agentService.RenderInstruction(agent) :
-            agentService.RenderTemplate(agent, templateName);
+        //// Render prompt
+        //var prompt = string.IsNullOrEmpty(templateName) ?
+        //    agentService.RenderInstruction(agent) :
+        //    agentService.RenderTemplate(agent, templateName);
 
-        var completer = CompletionProvider.GetCompletion(_services,
-            agentConfig: agent.LlmConfig);
+        //var completer = CompletionProvider.GetCompletion(_services,
+        //    agentConfig: agent.LlmConfig);
 
-        if (completer is ITextCompletion textCompleter)
-        {
-            instruction = null;
-            provider = textCompleter.Provider;
-            model = textCompleter.Model;
+        //if (completer is ITextCompletion textCompleter)
+        //{
+        //    instruction = null;
+        //    provider = textCompleter.Provider;
+        //    model = textCompleter.Model;
 
-            result = await GetTextCompletion(textCompleter, agent, prompt, message.MessageId);
-            response.Text = result;
-        }
-        else if (completer is IChatCompletion chatCompleter)
-        {
-            provider = chatCompleter.Provider;
-            model = chatCompleter.Model;
+        //    result = await GetTextCompletion(textCompleter, agent, prompt, message.MessageId);
+        //    response.Text = result;
+        //}
+        //else if (completer is IChatCompletion chatCompleter)
+        //{
+        //    provider = chatCompleter.Provider;
+        //    model = chatCompleter.Model;
            
 
-            if (instruction == "#TEMPLATE#")
-            {
-                instruction = prompt;
-                prompt = message.Content;
-            }
+        //    if (instruction == "#TEMPLATE#")
+        //    {
+        //        instruction = prompt;
+        //        prompt = message.Content;
+        //    }
 
-            IFileProcessor? fileProcessor = null;
-            if (!files.IsNullOrEmpty() && fileOptions != null)
-            {
-                fileProcessor = _services.GetServices<IFileProcessor>()
-                                         .FirstOrDefault(x => x.Provider.IsEqualTo(fileOptions.Processor));
-            }
+        //    IFileProcessor? fileProcessor = null;
+        //    if (!files.IsNullOrEmpty() && fileOptions != null)
+        //    {
+        //        fileProcessor = _services.GetServices<IFileProcessor>()
+        //                                 .FirstOrDefault(x => x.Provider.IsEqualTo(fileOptions.Processor));
+        //    }
 
-            if (fileProcessor != null)
-            {
-                var fileResponse = await fileProcessor.HandleFilesAsync(agent, prompt, files, new FileHandleOptions
-                {
-                    Provider = provider,
-                    Model = model,
-                    Instruction = instruction,
-                    UserMessage = message.Content,
-                    TemplateName = templateName,
-                    InvokeFrom = $"{nameof(InstructService)}.{nameof(Execute)}",
-                    Data = state.GetStates().ToDictionary(x => x.Key, x => (object)x.Value)
-                });
-                result = fileResponse.Result.IfNullOrEmptyAs(string.Empty);
-            }
-            else
-            {
-                result = await GetChatCompletion(chatCompleter, agent, instruction, prompt, message.MessageId, files);
-            }
-            response.Text = result;
-        }
+        //    if (fileProcessor != null)
+        //    {
+        //        var fileResponse = await fileProcessor.HandleFilesAsync(agent, prompt, files, new FileHandleOptions
+        //        {
+        //            Provider = provider,
+        //            Model = model,
+        //            Instruction = instruction,
+        //            UserMessage = message.Content,
+        //            TemplateName = templateName,
+        //            InvokeFrom = $"{nameof(InstructService)}.{nameof(Execute)}",
+        //            Data = state.GetStates().ToDictionary(x => x.Key, x => (object)x.Value)
+        //        });
+        //        result = fileResponse.Result.IfNullOrEmptyAs(string.Empty);
+        //    }
+        //    else
+        //    {
+        //        result = await GetChatCompletion(chatCompleter, agent, instruction, prompt, message.MessageId, files);
+        //    }
+        //    response.Text = result;
+        //}
 
-        response.LogId = Guid.NewGuid().ToString();
-        // After completion hooks
-        foreach (var hook in hooks)
-        {
-            await hook.AfterCompletion(agent, response);
-            await hook.OnResponseGenerated(new InstructResponseModel
-            {
-                LogId = response.LogId,
-                AgentId = agentId,
-                Provider = provider,
-                Model = model,
-                TemplateName = templateName,
-                UserMessage = prompt,
-                SystemInstruction = instruction,
-                CompletionText = response.Text
-            });
-        }
+        //response.LogId = Guid.NewGuid().ToString();
+        //// After completion hooks
+        //foreach (var hook in hooks)
+        //{
+        //    await hook.AfterCompletion(agent, response);
+        //    await hook.OnResponseGenerated(new InstructResponseModel
+        //    {
+        //        LogId = response.LogId,
+        //        AgentId = agentId,
+        //        Provider = provider,
+        //        Model = model,
+        //        TemplateName = templateName,
+        //        UserMessage = prompt,
+        //        SystemInstruction = instruction,
+        //        CompletionText = response.Text
+        //    });
+        //}
 
-        return response;
+        //return response;
     }
 
     /// <summary>
@@ -257,14 +254,14 @@ public partial class InstructService
 
         // Run code script
         var (useLock, useProcess, timeoutSeconds) = GetCodeExecutionConfig(codingSettings);
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+        //using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
         var codeResponse = await codeProcessor.RunAsync(context.CodeScript?.Content ?? string.Empty, options: new()
         {
             ScriptName = context.CodeScript?.Name,
             Arguments = context.Arguments,
             UseLock = useLock,
             UseProcess = useProcess
-        }, cancellationToken: cts.Token);
+        }, cancellationToken: CancellationToken.None);
 
         if (codeResponse?.Success == true)
         {
