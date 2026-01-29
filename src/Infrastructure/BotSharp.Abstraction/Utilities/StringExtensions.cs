@@ -148,4 +148,37 @@ public static partial class StringExtensions
         var str = JsonSerializer.Serialize(value, jsonOptions);
         return str;
     }
+
+    public static int GetStringByteCount(this string? str, string encoding = "utf-8")
+    {
+        if (string.IsNullOrEmpty(str))
+        {
+            return 0;
+        }
+
+        var count = 0;
+        switch (encoding)
+        {
+            case "utf-32":
+                count = Encoding.UTF32.GetByteCount(str);
+                break;
+            case "ascii":
+                count = Encoding.ASCII.GetByteCount(str);
+                break;
+            case "unicode":
+                count = Encoding.Unicode.GetByteCount(str);
+                break;
+            default:
+                count = Encoding.UTF8.GetByteCount(str);
+                break;
+        }
+
+        return count;
+    }
+
+    public static bool ValidateStringByteLength(this string? str, string encoding = "utf-8", int limit = 65535)
+    {
+        var count = str.GetStringByteCount(encoding);
+        return count <= limit;
+    }
 }

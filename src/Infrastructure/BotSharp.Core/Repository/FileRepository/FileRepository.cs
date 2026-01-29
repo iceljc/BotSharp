@@ -489,5 +489,14 @@ public partial class FileRepository : IBotSharpRepository
         var name = path.Split(Path.DirectorySeparatorChar).Last();
         return name.Split(separator);
     }
+
+    private void ValidateStringLength(string name, string? strValue, int maxBytes = 65535, LogLevel logLevel = LogLevel.Critical)
+    {
+        var isValid = strValue.ValidateStringByteLength(limit: maxBytes);
+        if (!isValid)
+        {
+            _logger.Log(logLevel, $"{name} string ({(strValue ?? string.Empty).SubstringMax(20)}) exceeds the byte length limit ({maxBytes} bytes). Please reduce the string length to meet storage size limits.");
+        }
+    }
     #endregion
 }

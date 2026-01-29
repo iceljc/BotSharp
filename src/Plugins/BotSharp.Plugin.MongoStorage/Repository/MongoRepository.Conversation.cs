@@ -1,6 +1,7 @@
 using BotSharp.Abstraction.Conversations.Models;
 using BotSharp.Abstraction.Repositories.Filters;
 using MongoDB.Driver.Linq;
+using Serilog;
 using System.Text.Json;
 
 namespace BotSharp.Plugin.MongoStorage.Repository;
@@ -117,6 +118,14 @@ public partial class MongoRepository
 
         await _dc.ConversationDialogs.UpdateOneAsync(filterDialog, updateDialog);
         await _dc.Conversations.UpdateOneAsync(filterConv, updateConv);
+
+#if DEBUG
+        foreach (var dialog in dialogElements)
+        {
+            ValidateStringLength($"{nameof(ConversationDialogDocument)}.{nameof(dialog.Content)}", dialog.Content);
+            ValidateStringLength($"{nameof(ConversationDialogDocument)}.{nameof(dialog.RichContent)}", dialog.RichContent);
+        }
+#endif
     }
 
     public async Task UpdateConversationTitle(string conversationId, string title)
@@ -294,6 +303,14 @@ public partial class MongoRepository
                                                           .Set(x => x.UpdatedTime, DateTime.UtcNow);
 
         await _dc.Conversations.UpdateOneAsync(filter, update);
+
+
+#if DEBUG
+        foreach (var state in saveStates)
+        {
+            ValidateStringLength($"{nameof(ConversationStateDocument)}.States.{state.Key}", state.Values.LastOrDefault()?.Data);
+        }
+#endif
     }
 
     public async Task UpdateConversationStatus(string conversationId, string status)

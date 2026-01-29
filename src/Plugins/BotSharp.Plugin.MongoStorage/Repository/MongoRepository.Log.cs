@@ -1,7 +1,6 @@
 using BotSharp.Abstraction.Loggers.Models;
 using BotSharp.Abstraction.Repositories.Filters;
 using BotSharp.Abstraction.Repositories.Models;
-using MongoDB.Driver;
 using System.Text.Json;
 
 namespace BotSharp.Plugin.MongoStorage.Repository;
@@ -31,6 +30,7 @@ public partial class MongoRepository
 
     #endregion
 
+
     #region Conversation Content Log
     public async Task SaveConversationContentLog(ContentLogOutputModel log)
     {
@@ -51,6 +51,10 @@ public partial class MongoRepository
             Content = log.Content,
             CreatedTime = log.CreatedTime
         };
+
+#if DEBUG
+        ValidateStringLength($"{nameof(ConversationContentLogDocument)}.{nameof(log.Content)}", log.Content);
+#endif
 
         await _dc.ContentLogs.InsertOneAsync(logDoc);
     }
@@ -88,6 +92,7 @@ public partial class MongoRepository
     }
     #endregion
 
+
     #region Conversation State Log
     public async Task SaveConversationStateLog(ConversationStateLogModel log)
     {
@@ -105,6 +110,13 @@ public partial class MongoRepository
             States = log.States,
             CreatedTime = log.CreatedTime
         };
+
+#if DEBUG
+        foreach (var state in (log.States ?? []))
+        {
+            ValidateStringLength($"{nameof(ConversationStateLogModel)}.{nameof(log.States)}.{state.Key}", state.Value);
+        }
+#endif
 
         await _dc.StateLogs.InsertOneAsync(logDoc);
     }
@@ -139,6 +151,7 @@ public partial class MongoRepository
     }
     #endregion
 
+
     #region Instruction Log
     public async Task<bool> SaveInstructionLogs(IEnumerable<InstructionLogModel> logs)
     {
@@ -151,6 +164,13 @@ public partial class MongoRepository
         foreach (var log in logs)
         {
             var doc = InstructionLogDocument.ToMongoModel(log);
+
+#if DEBUG
+            ValidateStringLength($"{nameof(InstructionLogDocument)}.{nameof(log.SystemInstruction)}", log.SystemInstruction);
+            ValidateStringLength($"{nameof(InstructionLogDocument)}.{nameof(log.UserMessage)}", log.UserMessage);
+            ValidateStringLength($"{nameof(InstructionLogDocument)}.{nameof(log.CompletionText)}", log.CompletionText);
+#endif
+
             foreach (var pair in log.States)
             {
                 try
@@ -173,6 +193,10 @@ public partial class MongoRepository
                     var json = BsonDocument.Parse(jsonStr);
                     doc.States[pair.Key] = json;
                 }
+
+#if DEBUG
+                ValidateStringLength($"{nameof(InstructionLogDocument)}.{nameof(log.States)}.{pair.Key}", pair.Value);
+#endif
             }
             docs.Add(doc);
         }
@@ -219,6 +243,10 @@ public partial class MongoRepository
                 var json = BsonDocument.Parse(jsonStr);
                 logDoc.States[key] = json;
             }
+
+#if DEBUG
+            ValidateStringLength($"{nameof(InstructionLogDocument)}.States.{pair.Key}", pair.Value);
+#endif
         }
         await _dc.InstructionLogs.ReplaceOneAsync(p => p.Id == id, logDoc);
         return true;

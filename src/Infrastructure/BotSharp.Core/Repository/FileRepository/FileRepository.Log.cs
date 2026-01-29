@@ -36,6 +36,7 @@ public partial class FileRepository
     }
     #endregion
 
+
     #region Conversation Content Log
     public async Task SaveConversationContentLog(ContentLogOutputModel log)
     {
@@ -62,6 +63,10 @@ public partial class FileRepository
         var index = GetNextLogIndex(logDir, log.MessageId);
         var file = Path.Combine(logDir, $"{log.MessageId}.{index}.log");
         await File.WriteAllTextAsync(file, JsonSerializer.Serialize(log, _options));
+
+#if DEBUG
+        ValidateStringLength($"{nameof(ContentLogOutputModel)}.{nameof(log.Content)}", log.Content);
+#endif
     }
 
     public async Task<DateTimePagination<ContentLogOutputModel>> GetConversationContentLogs(string conversationId, ConversationLogFilter filter)
@@ -107,6 +112,7 @@ public partial class FileRepository
     }
     #endregion
 
+
     #region Conversation State Log
     public async Task SaveConversationStateLog(ConversationStateLogModel log)
     {
@@ -133,6 +139,13 @@ public partial class FileRepository
         var index = GetNextLogIndex(logDir, log.MessageId);
         var file = Path.Combine(logDir, $"{log.MessageId}.{index}.log");
         await File.WriteAllTextAsync(file, JsonSerializer.Serialize(log, _options));
+
+#if DEBUG
+        foreach (var state in (log.States ?? []))
+        {
+            ValidateStringLength($"{nameof(ConversationStateLogModel)}.States.{state.Key}", state.Value);
+        }
+#endif
     }
 
     public async Task<DateTimePagination<ConversationStateLogModel>> GetConversationStateLogs(string conversationId, ConversationLogFilter filter)
@@ -178,6 +191,7 @@ public partial class FileRepository
     }
     #endregion
 
+
     #region Instruction Log
     public async Task<bool> SaveInstructionLogs(IEnumerable<InstructionLogModel> logs)
     {
@@ -200,7 +214,19 @@ public partial class FileRepository
             innerLog.States = BuildLogStates(log.States);
             var text = JsonSerializer.Serialize(innerLog, _options);
             await File.WriteAllTextAsync(file, text);
+
+#if DEBUG
+            ValidateStringLength($"{nameof(InstructionLogModel)}.{nameof(log.SystemInstruction)}", log.SystemInstruction);
+            ValidateStringLength($"{nameof(InstructionLogModel)}.{nameof(log.UserMessage)}", log.UserMessage);
+            ValidateStringLength($"{nameof(InstructionLogModel)}.{nameof(log.CompletionText)}", log.CompletionText);
+
+            foreach (var state in log.States)
+            {
+                ValidateStringLength($"{nameof(InstructionLogModel)}.States.{state.Key}", state.Value);
+            }
+#endif
         }
+
         return true;
     }
 
@@ -252,11 +278,14 @@ public partial class FileRepository
             {
                 var jsonStr = JsonSerializer.Serialize(new
                 {
-                    Data = pair.Value,
-                    StringfyData = pair.Value
+                    Data = pair.Value
                 }, _options);
                 log.States[key] = JsonDocument.Parse(jsonStr);
             }
+
+#if DEBUG
+            ValidateStringLength($"{nameof(InstructionFileLogModel)}.States.{key}", pair.Value);
+#endif
         }
 
         await File.WriteAllTextAsync(logFile, JsonSerializer.Serialize(log, _options));
@@ -493,8 +522,7 @@ public partial class FileRepository
             {
                 var str = JsonSerializer.Serialize(new
                 {
-                    Data = pair.Value,
-                    StringfyData = pair.Value
+                    Data = pair.Value
                 }, _options);
                 var json = JsonDocument.Parse(str);
                 dic[pair.Key] = json;

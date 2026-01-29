@@ -1,4 +1,5 @@
 using BotSharp.Abstraction.Loggers.Models;
+using Serilog;
 using System.IO;
 using System.Threading;
 
@@ -113,45 +114,55 @@ public partial class FileRepository
     public async Task AppendConversationDialogs(string conversationId, List<DialogElement> dialogs)
     {
         var convDir = FindConversationDirectory(conversationId);
-        if (!string.IsNullOrEmpty(convDir))
+        if (string.IsNullOrEmpty(convDir))
         {
-            await _dialogLock.WaitAsync();
-            try
-            {
-                var dialogFile = Path.Combine(convDir, DIALOG_FILE);
-                if (File.Exists(dialogFile))
-                {
-                    var prevDialogs = await File.ReadAllTextAsync(dialogFile);
-                    var elements = JsonSerializer.Deserialize<List<DialogElement>>(prevDialogs, _options);
-                    if (elements != null)
-                    {
-                        elements.AddRange(dialogs);
-                    }
-                    else
-                    {
-                        elements = elements ?? new List<DialogElement>();
-                    }
+            return;
+        }
 
-                    await File.WriteAllTextAsync(dialogFile, JsonSerializer.Serialize(elements, _options));
+        await _dialogLock.WaitAsync();
+        try
+        {
+            var dialogFile = Path.Combine(convDir, DIALOG_FILE);
+            if (File.Exists(dialogFile))
+            {
+                var prevDialogs = await File.ReadAllTextAsync(dialogFile);
+                var elements = JsonSerializer.Deserialize<List<DialogElement>>(prevDialogs, _options);
+                if (elements != null)
+                {
+                    elements.AddRange(dialogs);
+                }
+                else
+                {
+                    elements = elements ?? new List<DialogElement>();
                 }
 
-                var convFile = Path.Combine(convDir, CONVERSATION_FILE);
-                if (File.Exists(convFile))
+                await File.WriteAllTextAsync(dialogFile, JsonSerializer.Serialize(elements, _options));
+            }
+
+            var convFile = Path.Combine(convDir, CONVERSATION_FILE);
+            if (File.Exists(convFile))
+            {
+                var json = await File.ReadAllTextAsync(convFile);
+                var conv = JsonSerializer.Deserialize<Conversation>(json, _options);
+                if (conv != null)
                 {
-                    var json = await File.ReadAllTextAsync(convFile);
-                    var conv = JsonSerializer.Deserialize<Conversation>(json, _options);
-                    if (conv != null)
-                    {
-                        conv.DialogCount += dialogs.Count();
-                        conv.UpdatedTime = DateTime.UtcNow;
-                        await File.WriteAllTextAsync(convFile, JsonSerializer.Serialize(conv, _options));
-                    }
+                    conv.DialogCount += dialogs.Count();
+                    conv.UpdatedTime = DateTime.UtcNow;
+                    await File.WriteAllTextAsync(convFile, JsonSerializer.Serialize(conv, _options));
                 }
             }
-            finally
+
+#if DEBUG
+            foreach (var dialog in dialogs)
             {
-                _dialogLock.Release();
+                ValidateStringLength($"{nameof(DialogElement)}.{nameof(dialog.Content)}", dialog.Content);
+                ValidateStringLength($"{nameof(DialogElement)}.{nameof(dialog.RichContent)}", dialog.RichContent);
             }
+#endif
+        }
+        finally
+        {
+            _dialogLock.Release();
         }
     }
 
@@ -393,6 +404,13 @@ public partial class FileRepository
                 var stateStr = JsonSerializer.Serialize(latestStates, _options);
                 await File.WriteAllTextAsync(latestStateFile, stateStr);
             }
+
+#if DEBUG
+            foreach (var state in states)
+            {
+                ValidateStringLength($"Conversation.States.{state.Key}", state.Values.LastOrDefault()?.Data);
+            }
+#endif
         }
         finally
         {
