@@ -22,7 +22,7 @@ public sealed class KnowledgePipeline
         var pipleline = Init();
         foreach (var step in steps)
         {
-            pipleline.AddStep(step);
+            pipleline = pipleline.AddStep(step);
         }
         return pipleline;
     }
